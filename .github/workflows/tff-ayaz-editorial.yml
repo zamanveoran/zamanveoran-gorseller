@@ -1,0 +1,90 @@
+name: Create TFF Secretary Resignation Editorial Card
+on:
+  push:
+    paths:
+      - '.github/workflows/tff-ayaz-editorial.yml'
+permissions:
+  contents: write
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip -q install pillow
+      - name: Design exclusive ZO editorial graphic
+        run: |
+          mkdir -p images
+          cat > /tmp/render.py <<'PY'
+          from PIL import Image, ImageDraw, ImageFont, ImageFilter
+          from math import sin,cos,pi
+          from random import Random
+          r=Random(41)
+          W,H=1600,900
+          a=Image.new('RGB',(W,H),'#080b12')
+          p=a.load()
+          for y in range(H):
+              for x in range(W):
+                  dx=(x-1140)/900;dy=(y-520)/600
+                  glow=max(0,1-(dx*dx+dy*dy))
+                  red=int(5+30*glow+5*y/H)
+                  p[x,y]=(red,11+int(4*glow),18+int(4*x/W))
+          d=ImageDraw.Draw(a)
+          B='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+          R='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+          def ft(z,b=True):return ImageFont.truetype(B if b else R,z)
+          RED='#F02336';PALE='#F7F5F4';MUTED='#B0ADB3';YELLOW='#FFE2BB'
+          for i in range(19):
+              x=900+i*39
+              d.line((x,0,x-115,H),fill=(42,20,26),width=1)
+          for i in range(35):
+              y=20+i*27
+              d.line((850,y,1599,y),fill=(25,17,22),width=1)
+          # Dark analysis workstation: monitor framework, news dossier and lines
+          d.rounded_rectangle((930,115,1505,765),radius=24,fill='#121820',outline='#6D2730',width=3)
+          d.rectangle((955,142,1483,151),fill=RED)
+          d.text((968,173),'TFF  /  RESMÎ DUYURU',font=ft(29),fill=PALE)
+          d.text((968,224),'GENEL SEKRETERLİK',font=ft(23,False),fill=MUTED)
+          d.line((960,270,1470,270),fill='#4A4349',width=2)
+          d.text((963,294),'ABDULLAH AYAZ',font=ft(51),fill=PALE)
+          d.text((963,382),'GÖREVİNDEN AYRILDI',font=ft(30),fill=RED)
+          d.rounded_rectangle((969,462,1466,558),radius=15,fill='#1F252F')
+          d.ellipse((997,496,1014,513),fill=RED)
+          d.text((1034,478),'05 EKİM 2026',font=ft(31),fill=PALE)
+          d.text((1034,515),'İstifa federasyona sunuldu',font=ft(21,False),fill=MUTED)
+          d.rounded_rectangle((969,580,1466,678),radius=15,fill='#1F252F')
+          d.ellipse((997,615,1014,632),fill=RED)
+          d.text((1034,596),'07 EKİM 2026',font=ft(31),fill=PALE)
+          d.text((1034,635),'TFF kamuoyuna duyurdu',font=ft(21,False),fill=MUTED)
+          d.rectangle((930,787,1504,791),fill=RED)
+          # logo, compact, consistent with current ZO monogram
+          d.ellipse((68,70,267,269),fill='#07090e',outline=RED,width=9)
+          d.text((91,93),'Z',font=ft(120),fill=PALE)
+          d.arc((167,97,244,195),15,330,fill=PALE,width=15)
+          d.ellipse((182,111,233,163),outline=RED,width=6)
+          d.line((206,138,218,119),fill=PALE,width=6)
+          d.line((206,138,197,129),fill=PALE,width=4)
+          d.text((73,288),'@zamanveoran',font=ft(31,False),fill=PALE)
+          d.rounded_rectangle((77,379,546,447),radius=11,fill=RED)
+          d.text((108,393),'TFF  |  7 EKİM DUYURUSU',font=ft(29),fill=PALE)
+          d.text((69,478),"TFF'DE",font=ft(119),fill=PALE,stroke_width=0)
+          d.text((66,588),'İSTİFA',font=ft(146),fill=RED)
+          d.line((76,762,800,762),fill=RED,width=5)
+          d.text((74,795),'Ayrılık resmî açıklamayla duyuruldu.',font=ft(28,False),fill=PALE)
+          d.text((74,849),'Kaynak: Türkiye Futbol Federasyonu',font=ft(21,False),fill=MUTED)
+          a.save('images/tff-genel-sekreter-ayaz-istifa-20261008.png',optimize=True)
+          print('IMAGE_SAVED',a.size)
+          PY
+          python /tmp/render.py
+      - name: Commit public original graphic
+        run: |
+          git config user.name 'zamanveoran-image-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add images/tff-genel-sekreter-ayaz-istifa-20261008.png
+          if ! git diff --cached --quiet; then
+            git commit -m 'Create ZO official TFF departure editorial infographic'
+            git push
+          fi
