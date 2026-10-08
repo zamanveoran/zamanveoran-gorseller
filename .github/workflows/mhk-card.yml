@@ -1,0 +1,50 @@
+name: Generate Zaman ve Oran MHK News Card
+on:
+  push:
+    paths:
+      - '.github/workflows/mhk-card.yml'
+permissions:
+  contents: write
+jobs:
+  card:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pillow
+      - name: Generate verified text-only branded news card
+        run: |
+          mkdir -p images
+          python - <<'PY'
+          from PIL import Image, ImageDraw, ImageFont
+          img=Image.new('RGB',(1200,675),'#0a1420')
+          d=ImageDraw.Draw(img)
+          def ft(n,b=True):
+              name='DejaVuSans-Bold.ttf' if b else 'DejaVuSans.ttf'
+              return ImageFont.truetype('/usr/share/fonts/truetype/dejavu/'+name,n)
+          d.rectangle((0,0,15,675),fill='#e93b43')
+          d.rectangle((0,0,1200,13),fill='#e93b43')
+          d.text((72,54),'ZAMAN & ORAN',font=ft(53),fill='#ffffff')
+          d.text((75,127),'@zamanveoran  |  FUTBOL HABER',font=ft(22,False),fill='#bbc7d3')
+          d.rectangle((73,197,439,255),fill='#e93b43')
+          d.text((93,206),'MHK AÇIKLAMASI',font=ft(30),fill='white')
+          d.text((70,298),'HAKEM ATAMALARI',font=ft(66),fill='white')
+          d.text((72,385),'SÜPER LİG: ANTHONY TAYLOR',font=ft(34),fill='#ffda58')
+          d.text((72,434),'1. LİG: ALAN SNODDY',font=ft(34),fill='#ffda58')
+          d.text((73,495),'Teknik değerlendirmeleri esas alınıyor.',font=ft(29,False),fill='white')
+          d.rectangle((72,576,1128,579),fill='#e93b43')
+          d.text((73,605),'Kaynak: beIN SPORTS',font=ft(22,False),fill='#bcc5cf')
+          d.text((852,605),'FUTBOLU FARKLI OKU',font=ft(19,False),fill='#bcc5cf')
+          img.save('images/mhk-hakem-atamalari-20261008.png',optimize=True)
+          PY
+      - name: Commit media only
+        run: |
+          git config user.name "zamanveoran-gorsel-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images/mhk-hakem-atamalari-20261008.png
+          if ! git diff --cached --quiet; then
+            git commit -m "Add licensed original MHK branded news graphic"
+            git push
+          fi
