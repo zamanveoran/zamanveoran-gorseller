@@ -17,6 +17,7 @@ jobs:
       - run: pip -q install pillow
       - name: Generate accurate editorial list graphic
         run: |
+          python - <<'PY'
           from PIL import Image, ImageDraw, ImageFont, ImageFilter
           import math, os
           W,H=1200,1720
@@ -75,6 +76,7 @@ jobs:
           os.makedirs('images',exist_ok=True)
           img.save('images/super-lig-7-hafta-hakemleri-20261008.png', optimize=True)
           print('CREATED_BRANDED_PNG',os.stat('images/super-lig-7-hafta-hakemleri-20261008.png').st_size)
+          PY
       - name: Commit the new media asset
         run: |
           git config user.name "zamanveoran-gorsel-bot"
