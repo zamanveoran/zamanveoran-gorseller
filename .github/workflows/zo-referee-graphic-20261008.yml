@@ -1,0 +1,32 @@
+name: ZO Referee News Graphic
+on:
+  push:
+    paths: ['.github/workflows/zo-referee-graphic-20261008.yml']
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q pillow
+      - run: |
+          python - <<'PY'
+          from PIL import Image,ImageDraw,ImageFont
+          im=Image.new("RGB",(1400,900),(11,13,20));d=ImageDraw.Draw(im)
+          f=lambda n:ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",n)
+          d.rectangle((0,0,1400,16),fill=(238,37,52))
+          d.text((90,80),"SÜPER LİG  /  7. HAFTA",font=f(42),fill=(238,37,52))
+          d.text((90,190),"HAKEM BELLİ OLDU",font=f(85),fill="white")
+          d.rectangle((90,335,1310,345),fill=(238,37,52))
+          d.text((90,405),"GALATASARAY",font=f(70),fill="white")
+          d.text((90,500),"KASIMPAŞA",font=f(70),fill="white")
+          d.text((90,640),"HALİL UMUT MELER",font=f(65),fill=(238,37,52))
+          d.text((90,797),"@zamanveoran",font=f(45),fill="white")
+          im.save("images/zo-hakem-meler-20261008.png")
+          PY
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add images/zo-hakem-meler-20261008.png
+          git commit -m "Add 7th week referee news graphic"
+          git push
