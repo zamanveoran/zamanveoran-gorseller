@@ -1,0 +1,104 @@
+name: Create Premium Seven Week Referees Graphic
+on:
+  push:
+    paths:
+      - '.github/workflows/referee-list-premium-v2.yml'
+permissions:
+  contents: write
+jobs:
+  graphic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pillow
+      - name: Generate original premium branded referee list
+        run: |
+          cat > /tmp/render.py <<'PY'
+          from PIL import Image,ImageDraw,ImageFont,ImageFilter
+          from urllib.request import urlopen
+          from io import BytesIO
+          from random import Random
+          W,H=1350,1730
+          img=Image.new('RGB',(W,H),'#090b11');px=img.load()
+          for y in range(H):
+              for x in range(W):
+                  g=max(0,1-((x-670)/950)**2-((y-250)/900)**2)
+                  l=max(0,1-((x-50)/600)**2-((y-1400)/800)**2)
+                  px[x,y]=(int(8+35*g+25*l),int(9+7*g),int(14+9*g))
+          d=ImageDraw.Draw(img);r=Random(23)
+          for i in range(125):
+              x=r.randrange(W);y=r.randrange(H)
+              if r.randrange(4)==0:d.line((x,y,x+r.randrange(10,75),y-r.randrange(0,38)),fill=(72,20,30),width=1)
+          for y in range(290,H,74):d.line((0,y,W,y),fill=(32,27,35),width=1)
+          for x in range(20,W,86):d.line((x,280,x,H),fill=(28,26,35),width=1)
+          for k in range(3):
+              d.arc((W-440-k*40,90-k*30,W+190+k*50,620+k*80),190,355,fill=(115-k*25,15,32),width=5 if not k else 2)
+          G=Image.new('RGBA',(W,H));gd=ImageDraw.Draw(G)
+          gd.line((38,309,W-38,309),fill=(242,28,51,230),width=6)
+          gd.arc((36,20,1314,756),195,343,fill=(255,45,65,150),width=6)
+          img=Image.alpha_composite(img.convert('RGBA'),G.filter(ImageFilter.GaussianBlur(18)))
+          img=Image.alpha_composite(img,G);d=ImageDraw.Draw(img)
+          C='/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-Bold.ttf'
+          R='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+          font=lambda s,b=True:ImageFont.truetype(C if b else R,s)
+          white='#F7F9FC';red='#F42D46';gold='#FFDB83';muted='#B9C0CD'
+          # Reuse the already-created, approved Z/O arrow-and-gauge brand emblem.
+          u='https://raw.githubusercontent.com/zamanveoran/zamanveoran-gorseller/main/images/super-lig-7-hafta-hakemleri-20261008.png'
+          with urlopen(u,timeout=30) as z: original=Image.open(BytesIO(z.read())).convert('RGB')
+          if original.size[0]<1000:raise RuntimeError('Logo source invalid')
+          logo=original.crop((20,10,350,260)).resize((270,205),Image.Resampling.LANCZOS)
+          img.paste(logo,(42,31));d=ImageDraw.Draw(img)
+          d.text((73,249),'@zamanveoran',font=font(27,False),fill=white)
+          d.rounded_rectangle((342,52,699,109),radius=13,fill='#E02240')
+          d.text((362,63),'TRENDYOL SÜPER LİG',font=font(29),fill=white)
+          d.text((339,119),'7. HAFTA',font=font(80),fill=white)
+          d.text((342,210),'HAKEM ATAMALARI',font=font(69),fill=red)
+          d.text((1106,278),'9 MAÇ',font=font(23),fill=muted)
+          rows=[
+           ('CUMA 9 EKİM','20.00','Galatasaray – Kasımpaşa','Halil Umut Meler'),
+           ('CMT 10 EKİM','13.30','Gençlerbirliği – Amedspor','Ümit Öztürk'),
+           ('CMT 10 EKİM','16.00','Alanyaspor – Erzurumspor FK','Davut Dakul Çelik'),
+           ('CMT 10 EKİM','16.00','Samsunspor – Trabzonspor','Oğuzhan Çakır'),
+           ('CMT 10 EKİM','19.00','Çaykur Rizespor – Fenerbahçe','Ozan Ergün'),
+           ('PAZAR 11 EKİM','13.30','Konyaspor – Başakşehir','Batuhan Kolak'),
+           ('PAZAR 11 EKİM','16.00','Gaziantep FK – Çorum FK','Gürcan Hasova'),
+           ('PAZAR 11 EKİM','19.00','Beşiktaş – Kocaelispor','Abdullah Buğra Taşkınsoy'),
+           ('PZT 12 EKİM','20.00','Eyüpspor – Göztepe','Atilla Karaoğlan')]
+          for i,(date,time,match,ref) in enumerate(rows):
+              y=345+i*135
+              d.rounded_rectangle((48,y,1302,y+119),radius=22,fill='#101721',outline='#752538',width=3)
+              d.rounded_rectangle((51,y+3,1300,y+117),radius=20,outline='#3A313B',width=1)
+              d.rounded_rectangle((64,y+18,125,y+100),radius=12,fill='#2D0F1E')
+              d.text((77,y+36),str(i+1).zfill(2),font=font(37),fill=red)
+              d.text((152,y+15),date+'  |  '+time,font=font(23,False),fill=gold)
+              fs=39
+              while d.textbbox((0,0),match,font=font(fs))[2]>655 and fs>24:fs-=1
+              d.text((150,y+52),match,font=font(fs),fill=white)
+              d.line((805,y+21,805,y+102),fill='#B71D36',width=3)
+              d.text((836,y+15),'ORTA HAKEM',font=font(22,False),fill=muted)
+              fs2=39
+              while d.textbbox((0,0),ref,font=font(fs2))[2]>416 and fs2>24:fs2-=1
+              d.text((834,y+55),ref.upper(),font=font(fs2),fill=white)
+              d.rounded_rectangle((48,y+19,55,y+100),radius=3,fill=red)
+          d.line((60,1590,W-60,1590),fill=red,width=4)
+          d.text((63,1615),'9 KARŞILAŞMA  •  9 HAKEM  •  9–12 EKİM 2026',font=font(28),fill=white)
+          d.text((65,1667),'KAYNAK: TÜRKİYE FUTBOL FEDERASYONU (TFF)',font=font(22,False),fill=muted)
+          import os
+          os.makedirs('images',exist_ok=True)
+          img.convert('RGB').save('images/super-lig-7-hafta-hakemleri-premium-20261008.png',optimize=True)
+          print('PUBLISHED_ASSET_BYTES',os.path.getsize('images/super-lig-7-hafta-hakemleri-premium-20261008.png'))
+          PY
+          python /tmp/render.py
+      - name: Persist hosted PNG
+        run: |
+          git config user.name "zamanveoran-image-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images/super-lig-7-hafta-hakemleri-premium-20261008.png
+          if ! git diff --cached --quiet; then
+            git commit -m "Add premium editorial referee week seven card"
+            git push
+          fi
