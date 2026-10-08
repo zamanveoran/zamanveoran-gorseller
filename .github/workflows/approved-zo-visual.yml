@@ -1,0 +1,43 @@
+name: Approved ZO Tactical Visual
+on:
+  push:
+    paths: ['.github/workflows/approved-zo-visual.yml']
+permissions:
+  contents: write
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q pillow
+      - name: Render using exact user logo
+        run: |
+          python - <<'PY'
+          from PIL import Image,ImageDraw,ImageFont
+          W,H=1400,900
+          im=Image.new("RGB",(W,H),(9,13,20));d=ImageDraw.Draw(im)
+          red=(234,34,49)
+          for x in range(0,W,70):d.line((x,0,x-320,H),fill=(24,30,39),width=2)
+          d.rectangle((0,0,W,14),fill=red)
+          logo=Image.open("images/zamanveoran-onayli-logo.png").convert("RGB")
+          logo.thumbnail((430,430))
+          im.paste(logo,(55,205))
+          f=lambda s:ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",s)
+          d=ImageDraw.Draw(im)
+          d.text((540,135),"TAKTİK DOSYASI",font=f(45),fill=red)
+          d.text((540,245),"PRESİN SIRRI",font=f(69),fill="white")
+          d.text((540,350),"Topu nerede",font=f(54),fill="white")
+          d.text((540,420),"kazandığın önemlidir.",font=f(46),fill="white")
+          d.line((540,525,1300,525),fill=red,width=6)
+          for i,t in enumerate(("Pas açısını kapat","Takım halinde öne çık","İkinci topu topla")):
+              d.text((555,560+i*75),t,font=f(34),fill=(218,225,232))
+          d.text((80,810),"@zamanveoran",font=f(35),fill="white")
+          im.save("images/zo-onayli-pres-analizi-20261008.png",format="PNG")
+          PY
+      - name: Commit approved-logo visual
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images/zo-onayli-pres-analizi-20261008.png
+          git commit -m "Create editorial graphic with exact approved logo"
+          git push
