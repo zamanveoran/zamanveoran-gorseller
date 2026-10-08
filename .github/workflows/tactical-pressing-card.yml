@@ -1,0 +1,64 @@
+name: ZO Tactical Education Card
+on:
+  push:
+    paths: ['.github/workflows/tactical-pressing-card.yml']
+permissions:
+  contents: write
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip -q install pillow
+      - name: Make original football-analysis card
+        run: |
+          mkdir -p images
+          python - <<'PY'
+          from PIL import Image,ImageDraw,ImageFont
+          import math
+          W,H=1200,675
+          im=Image.new('RGB',(W,H),'#080b12');d=ImageDraw.Draw(im)
+          def f(n,b=False):
+              return ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans'+('-Bold' if b else '')+'.ttf',n)
+          R='#ed2635';white='#f4f6fb';grey='#b5bfca'
+          for i in range(17):
+              x=40+i*73
+              d.line((x,0,x-260,675),fill=(24,26,32),width=1)
+          for y in range(0,H,90):d.line((0,y,W,y),fill='#161923',width=1)
+          d.rectangle((0,0,1200,12),fill=R)
+          d.ellipse((61,48,211,198),outline=R,width=7)
+          d.text((84,88),'Z',font=f(72,True),fill=white)
+          d.ellipse((131,87,191,147),outline=white,width=8)
+          d.line((161,116,175,95),fill=R,width=5)
+          d.text((60,208),'@zamanveoran',font=f(25),fill=grey)
+          d.rectangle((280,60,910,120),fill='#a91926')
+          d.text((311,68),'TAKTİK DOSYASI  /  OYUN OKUMASI',font=f(27,True),fill=white)
+          d.text((278,147),'ÖN ALAN BASKISI',font=f(66,True),fill=white)
+          d.text((281,235),'NE ZAMAN İŞE YARAR?',font=f(39,True),fill=R)
+          paragraphs=['Baskının gücü yalnızca öne koşmak değildir.',
+          'Forvetin pas açısını kapatması, orta sahanın',
+          'ikinci topu toplaması ve savunma hattının',
+          'birlikte öne çıkması gerekir.',
+          'Bir halka koparsa rakibe boş koridor açılır.']
+          for i,line in enumerate(paragraphs):
+              d.text((281,316+i*43),line,font=f(27),fill=white if i<4 else '#ffe3ae')
+          # small diagram
+          d.rounded_rectangle((935,148,1152,542),radius=17,outline='#555a65',width=3,fill='#101923')
+          d.line((1043,164,1043,526),fill='#556777',width=2)
+          d.ellipse((973,321,1112,381),outline='#556777',width=2)
+          for x,y in [(990,246),(1074,246),(1020,292)]:d.ellipse((x-10,y-10,x+10,y+10),fill=R)
+          for x,y in [(990,416),(1075,417),(1032,460)]:d.ellipse((x-10,y-10,x+10,y+10),fill='#dfe2e8')
+          d.line((1000,247,1027,291),fill=R,width=5)
+          d.polygon([(1027,291),(1015,284),(1026,272)],fill=R)
+          d.line((278,566,1151,566),fill=R,width=4)
+          d.text((281,588),'FUTBOLU FARKLI OKU',font=f(22,True),fill=grey)
+          im.save('images/on-alan-baskisi-taktik-20261008.png',optimize=True)
+          PY
+      - name: Commit card
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images/on-alan-baskisi-taktik-20261008.png
+          if ! git diff --cached --quiet; then git commit -m "Add original ZO high-press football tactical analysis card"; git push; fi
