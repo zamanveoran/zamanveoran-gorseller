@@ -1,0 +1,35 @@
+name: ZO Gomis Where Now Cover
+on:
+  push:
+    paths: ['.github/workflows/zo-gomis-where-now-20261008.yml']
+permissions:
+  contents: write
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q pillow
+      - name: Draw minimalist series cover
+        run: |
+          python - <<'PY'
+          from PIL import Image,ImageDraw,ImageFont
+          im=Image.new("RGB",(1400,900),(12,13,19));d=ImageDraw.Draw(im)
+          f=lambda n:ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",n)
+          red=(238,40,55)
+          d.rectangle((0,0,1400,15),fill=red)
+          d.text((85,70),"ZAMAN VE ORAN  /  ÖZEL SERİ 01",font=f(38),fill=red)
+          d.text((85,180),"ŞİMDİ NEREDE?",font=f(103),fill="white")
+          d.text((85,300),"NE YAPIYOR?",font=f(100),fill=red)
+          d.line((85,450,1320,450),fill=red,width=7)
+          d.text((85,520),"BAFÉTIMBI GOMIS",font=f(80),fill="white")
+          d.text((85,650),"SAHADAN YÖNETİCİLİĞE",font=f(52),fill=(205,210,217))
+          d.text((85,798),"@zamanveoran",font=f(49),fill="white")
+          im.save("images/zo-gomis-simdi-nerede-20261008.png")
+          PY
+      - run: |
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add images/zo-gomis-simdi-nerede-20261008.png
+          git commit -m "Create Gomis where now series cover"
+          git push
