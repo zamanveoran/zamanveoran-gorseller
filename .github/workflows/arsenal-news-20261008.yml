@@ -1,0 +1,51 @@
+name: Generate Arsenal Reuters News Card 20261008
+on:
+  push:
+    paths:
+      - '.github/workflows/arsenal-news-20261008.yml'
+permissions:
+  contents: write
+jobs:
+  card:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -q pillow
+      - name: Generate copyrighted-photo-free original news graphic
+        run: |
+          mkdir -p images
+          python - <<'PY'
+          from PIL import Image, ImageDraw, ImageFont
+          w,h=1200,675
+          im=Image.new("RGB",(w,h),"#101723")
+          d=ImageDraw.Draw(im)
+          def ft(n,b=True):
+              return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/"+("DejaVuSans-Bold.ttf" if b else "DejaVuSans.ttf"),n)
+          red="#ed414b"; yellow="#f9d657";white="#f8f9fa";grey="#b4bdca"
+          d.rectangle((0,0,19,h),fill=red)
+          d.rectangle((0,0,w,11),fill=red)
+          d.text((65,38),"ZAMAN & ORAN",font=ft(56),fill=white)
+          d.text((68,118),"@zamanveoran  |  AVRUPA FUTBOLU",font=ft(24,False),fill=grey)
+          d.rounded_rectangle((68,203,478,259),radius=6,fill=red)
+          d.text((87,211),"PREMIER LEAGUE",font=ft(29),fill=white)
+          d.text((65,286),"ARSENAL'IN",font=ft(74),fill=white)
+          d.text((65,377),"YENİ HEDEFİ",font=ft(74),fill=yellow)
+          d.rectangle((70,482,1112,485),fill=red)
+          d.text((67,512),"CEO Richard Garlick: Uzun vadeli zirve hedefi",font=ft(31,False),fill=white)
+          d.text((67,563),"Arteta ile 2030'a uzanan plan",font=ft(31,False),fill=grey)
+          d.text((67,637),"Kaynak: Reuters",font=ft(21,False),fill=grey)
+          d.text((847,637),"FUTBOLU FARKLI OKU",font=ft(18,False),fill=grey)
+          im.save("images/arsenal-gelecek-hedefi-20261008.png",optimize=True)
+          PY
+      - name: Publish own news graphic in public image repo
+        run: |
+          git config user.name "zamanveoran-media"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images/arsenal-gelecek-hedefi-20261008.png
+          if ! git diff --cached --quiet; then
+            git commit -m "Create Arsenal news image"
+            git push
+          fi
