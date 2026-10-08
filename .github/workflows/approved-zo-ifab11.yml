@@ -1,7 +1,6 @@
 name: Approved ZO IFAB Law 11 Graphic
 on:
-  push:
-    paths: ['.github/workflows/approved-zo-ifab11.yml']
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
