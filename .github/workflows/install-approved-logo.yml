@@ -1,0 +1,28 @@
+name: Install approved ZO logo
+on:
+  push:
+    paths:
+      - '.github/workflows/install-approved-logo.yml'
+permissions:
+  contents: write
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate and install user-approved PNG
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import base64,json,os,urllib.request
+          repo=os.environ["GITHUB_REPOSITORY"]
+          source="file_000000003fec8243a534624bd38d1857.png"
+          raw="https://raw.githubusercontent.com/"+repo+"/main/"+source
+          with urllib.request.urlopen(raw,timeout=30) as r: data=r.read()
+          assert data.startswith(bytes.fromhex("89504e470d0a1a0a")) and len(data)>1000000, "Not approved PNG"
+          dest="images/zamanveoran-onayli-logo.png"
+          url=f"https://api.github.com/repos/{repo}/contents/{dest}"
+          payload=json.dumps({"message":"Install user-approved exact ZO logo","content":base64.b64encode(data).decode()}).encode()
+          req=urllib.request.Request(url,data=payload,headers={"Authorization":"Bearer "+os.environ["GH_TOKEN"],"Accept":"application/vnd.github+json","Content-Type":"application/json"},method="PUT")
+          with urllib.request.urlopen(req,timeout=30) as r: print("APPROVED_LOGO_INSTALLED",r.status,len(data))
+          PY
