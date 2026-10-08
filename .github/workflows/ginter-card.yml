@@ -30,7 +30,7 @@ jobs:
           d.text((75,127),'@zamanveoran  |  FUTBOL HABER',font=ft(22,False),fill='#bbc7d3')
           d.rectangle((73,197,439,255),fill='#e93b43')
           d.text((93,206),'BUNDESLIGA | FREIBURG',font=ft(30),fill='white')
-          d.text((70,298),'GINTER'LE DEVAM',font=ft(66),fill='white')
+          d.text((70,298),'GINTER İLE DEVAM',font=ft(66),fill='white')
           d.text((72,385),'MATTHIAS GINTER',font=ft(34),fill='#ffda58')
           d.text((72,434),'SÖZLEŞMESİNİ UZATTI',font=ft(34),fill='#ffda58')
           d.text((73,495),'Freiburg tecrübeli savunmacıyla yola devam ediyor.',font=ft(29,False),fill='white')
