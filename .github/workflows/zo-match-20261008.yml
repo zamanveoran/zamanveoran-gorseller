@@ -1,0 +1,37 @@
+name: ZO Fresh Match Poster 20261008
+on:
+  push:
+    paths: ['.github/workflows/zo-match-20261008.yml']
+permissions:
+  contents: write
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip -q install pillow
+      - name: Generate match news visual
+        run: |
+          python - <<'PY'
+          from PIL import Image,ImageDraw,ImageFont
+          im=Image.new("RGB",(1400,900),(10,12,19));d=ImageDraw.Draw(im)
+          font=lambda n:ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",n)
+          red=(232,34,52)
+          d.rectangle((0,0,1400,15),fill=red)
+          for x in range(60,1400,130):d.line((x,0,x-300,900),fill=(24,26,34),width=2)
+          d.text((85,75),"SÜPER LİG  |  9 EKİM",font=font(40),fill=red)
+          d.text((85,200),"MİLLİ ARA BİTTİ",font=font(77),fill="white")
+          d.text((85,325),"GALATASARAY",font=font(90),fill="white")
+          d.text((85,435),"KASIMPAŞA",font=font(90),fill=red)
+          d.line((85,565,1300,565),fill=red,width=6)
+          d.text((85,605),"CUMA 20.00  |  RAMS PARK",font=font(47),fill="white")
+          d.text((85,780),"@zamanveoran",font=font(47),fill="white")
+          im.save("images/zo-gs-kasimpasa-20261008.png")
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images/zo-gs-kasimpasa-20261008.png
+          git commit -m "Add Galatasaray Kasimpasa verified fixture graphic"
+          git push
