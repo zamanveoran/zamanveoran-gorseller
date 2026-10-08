@@ -18,6 +18,7 @@ jobs:
       - name: Generate accurate editorial list graphic
         run: |
           python - <<'PY'
+          python - <<'PY'
           from PIL import Image, ImageDraw, ImageFont, ImageFilter
           import math, os
           W,H=1200,1720
@@ -71,11 +72,12 @@ jobs:
               d.text((774,top+61),ref,font=ft(sz),fill=white)
           y=1643
           d.line((60,y,1144,y),fill=red,width=3)
-          d.text((65,1662),'KAYNAK: A HABER  |  FİKSTÜR: ANADOLU AJANSI',font=ft(20,False),fill=muted)
+          d.text((65,1662),'KAYNAK: TFF  |  8 EKİM 2026',font=ft(20,False),fill=muted)
           d.text((1020,1662),'Z / O',font=ft(22),fill=red)
           os.makedirs('images',exist_ok=True)
           img.save('images/super-lig-7-hafta-hakemleri-20261008.png', optimize=True)
           print('CREATED_BRANDED_PNG',os.stat('images/super-lig-7-hafta-hakemleri-20261008.png').st_size)
+          PY
           PY
       - name: Commit the new media asset
         run: |
