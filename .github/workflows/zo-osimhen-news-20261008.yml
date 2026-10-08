@@ -1,0 +1,36 @@
+name: ZO Osimhen News 20261008
+on:
+  push:
+    paths: ['.github/workflows/zo-osimhen-news-20261008.yml']
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip -q install pillow
+      - name: Create branded visual
+        run: |
+          python - <<'PY'
+          from PIL import Image,ImageDraw,ImageFont
+          im=Image.new('RGB',(1400,900),(12,13,19));d=ImageDraw.Draw(im)
+          f=lambda n:ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',n)
+          red=(232,37,52)
+          d.rectangle((0,0,1400,14),fill=red)
+          d.text((85,78),'GALATASARAY  /  GÜNDEM',font=f(39),fill=red)
+          d.text((85,195),'OSIMHEN',font=f(116),fill='white')
+          d.text((85,340),'İÇİN NET MESAJ',font=f(84),fill='white')
+          d.line((85,480,1315,480),fill=red,width=8)
+          d.text((85,545),'NİJERYA TEKNİK DİREKTÖRÜ',font=f(45),fill='white')
+          d.text((85,630),'"AYRILMAK İSTEMİYOR"',font=f(66),fill=red)
+          d.text((85,795),'@zamanveoran',font=f(51),fill='white')
+          im.save('images/zo-osimhen-chelle-20261008.png')
+          PY
+      - name: Commit image
+        run: |
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add images/zo-osimhen-chelle-20261008.png
+          git commit -m "Add Osimhen coach statement visual"
+          git push
